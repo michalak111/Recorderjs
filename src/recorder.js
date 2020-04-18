@@ -11,7 +11,8 @@ export class Recorder {
 
     callbacks = {
         getBuffer: [],
-        exportWAV: []
+        exportWAV: [],
+        exportSecondsToWAV: []
     };
 
     constructor(source, cfg) {
@@ -58,6 +59,9 @@ export class Recorder {
                     case 'getBuffer':
                         getBuffer();
                         break;
+                    case "exportSecondsToWAV":
+                        exportSecondsToWAV(e.data.type, e.data.seconds)
+                        break;
                     case 'clear':
                         clear();
                         break;
@@ -75,6 +79,36 @@ export class Recorder {
                     recBuffers[channel].push(inputBuffer[channel]);
                 }
                 recLength += inputBuffer[0].length;
+            }
+
+            function exportSecondsToWAV(type, seconds = 1) {
+                const SECONDS = seconds
+                const buffLength = 4096
+                const buffArrayLength = SECONDS * 11
+                let buffers = [];
+                for (let channel = 0; channel < numChannels; channel++) {
+                    const recBuffersArr = recBuffers[channel];
+
+                    let newRecBuffersArr = []
+                    for (let i = buffArrayLength; i > 0; i--) {
+                        if(recBuffersArr[recBuffersArr.length - i]) {
+                            newRecBuffersArr.push(recBuffersArr[recBuffersArr.length - i])
+                        }
+                    }
+
+                    const recLength = newRecBuffersArr.length * buffLength
+                    buffers.push(mergeBuffers(newRecBuffersArr, recLength));
+                }
+                let interleaved;
+                if (numChannels === 2) {
+                    interleaved = interleave(buffers[0], buffers[1]);
+                } else {
+                    interleaved = buffers[0];
+                }
+                let dataview = encodeWAV(interleaved);
+                let audioBlob = new Blob([dataview], {type: type});
+
+                this.postMessage({command: 'exportSecondsToWAV', data: audioBlob});
             }
 
             function exportWAV(type) {
@@ -237,6 +271,20 @@ export class Recorder {
         this.worker.postMessage({
             command: 'exportWAV',
             type: mimeType
+        });
+    }
+
+    exportSecondsToWAV(cb, seconds, mimeType) {
+        mimeType = mimeType || this.config.mimeType;
+        cb = cb || this.config.callback;
+        if (!cb) throw new Error('Callback not set');
+
+        this.callbacks.exportSecondsToWAV.push(cb);
+
+        this.worker.postMessage({
+            command: 'exportSecondsToWAV',
+            type: mimeType,
+            seconds: seconds
         });
     }
 

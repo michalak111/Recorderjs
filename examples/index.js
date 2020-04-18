@@ -19,12 +19,19 @@ function startUserMedia(stream) {
   __log('Recorder initialised.');
 }
 
+let recordInterval = null
+const recordIntervalSeconds = 1
+
 function startRecording(e) {
   const button = e.target
   recorder && recorder.record();
   button.disabled = true;
   button.nextElementSibling.disabled = false;
   __log('Recording...');
+
+  recordInterval = setInterval(() => {
+    createDownloadLinkFromLastSeconds(recordIntervalSeconds)
+  }, recordIntervalSeconds * 1000)
 }
 
 function stopRecording(e) {
@@ -38,24 +45,33 @@ function stopRecording(e) {
   createDownloadLink();
 
   recorder.clear();
+
+  clearInterval(recordInterval)
+}
+
+
+function createDownloadLinkFromLastSeconds(numOfSeconds) {
+  recorder && recorder.exportSecondsToWAV(linkFromBlob, numOfSeconds)
 }
 
 function createDownloadLink() {
-  recorder && recorder.exportWAV(function(blob) {
-    var url = URL.createObjectURL(blob);
-    var li = document.createElement('li');
-    var au = document.createElement('audio');
-    var hf = document.createElement('a');
+  recorder && recorder.exportWAV(linkFromBlob);
+}
 
-    au.controls = true;
-    au.src = url;
-    hf.href = url;
-    hf.download = new Date().toISOString() + '.wav';
-    hf.innerHTML = hf.download;
-    li.appendChild(au);
-    li.appendChild(hf);
-    recordingslist.appendChild(li);
-  });
+function linkFromBlob (blob) {
+  var url = URL.createObjectURL(blob);
+  var li = document.createElement('li');
+  var au = document.createElement('audio');
+  var hf = document.createElement('a');
+
+  au.controls = true;
+  au.src = url;
+  hf.href = url;
+  hf.download = new Date().toISOString() + '.wav';
+  hf.innerHTML = hf.download;
+  li.appendChild(au);
+  li.appendChild(hf);
+  recordingslist.appendChild(li);
 }
 
 window.onload = function init() {
