@@ -17,9 +17,9 @@
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zlokomatic/Recorderjs/issues"
+    "url": "https://github.com/michalak111/Recorderjs/issues"
   },
-  "homepage": "https://github.com/zlokomatic/Recorderjs#readme",
+  "homepage": "https://github.com/michalak111/Recorderjs#readme",
   "dependencies": {
     "inline-worker": "^0.1.0"
   },
