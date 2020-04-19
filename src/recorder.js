@@ -43,7 +43,8 @@ export class Recorder {
             let recLength = 0,
                 recBuffers = [],
                 sampleRate,
-                numChannels;
+                numChannels,
+                bufferLen;
 
             this.onmessage = function (e) {
                 switch (e.data.command) {
@@ -71,6 +72,7 @@ export class Recorder {
             function init(config) {
                 sampleRate = config.sampleRate;
                 numChannels = config.numChannels;
+                bufferLen = config.bufferLen;
                 initBuffers();
             }
 
@@ -82,9 +84,7 @@ export class Recorder {
             }
 
             function exportSecondsToWAV(type, seconds = 1) {
-                const SECONDS = seconds
-                const buffLength = 4096
-                const buffArrayLength = SECONDS * 11
+                const buffArrayLength = seconds * 11
                 let buffers = [];
                 for (let channel = 0; channel < numChannels; channel++) {
                     const recBuffersArr = recBuffers[channel];
@@ -96,7 +96,7 @@ export class Recorder {
                         }
                     }
 
-                    const recLength = newRecBuffersArr.length * buffLength
+                    const recLength = newRecBuffersArr.length * bufferLen
                     buffers.push(mergeBuffers(newRecBuffersArr, recLength));
                 }
                 let interleaved;
@@ -227,7 +227,8 @@ export class Recorder {
             command: 'init',
             config: {
                 sampleRate: this.context.sampleRate,
-                numChannels: this.config.numChannels
+                numChannels: this.config.numChannels,
+                bufferLen: this.config.bufferLen,
             }
         });
 
