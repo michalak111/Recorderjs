@@ -84,7 +84,8 @@ export class Recorder {
             }
 
             function exportSecondsToWAV(type, seconds = 1) {
-                const buffArrayLength = seconds * 11
+                const audioProcessingFreq = 11  // todo count onaudioprocess frequency per second
+                const buffArrayLength = seconds * audioProcessingFreq
                 let buffers = [];
                 for (let channel = 0; channel < numChannels; channel++) {
                     const recBuffersArr = recBuffers[channel];
