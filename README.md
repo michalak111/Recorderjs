@@ -43,6 +43,11 @@ This will generate a Blob object containing the recording in WAV format. The cal
 
 In addition, you may specify the type of Blob to be returned (defaults to 'audio/wav').
 
+    rec.exportSecondsToWAV([callback][, seconds[, type]])
+
+This allows to export last n seconds from recorded buffer. If recording is shorter than passed seconds argument then all audio will be returned.
+
+
     rec.getBuffer([callback])
 
 This will pass the recorded stereo buffer (as an array of two Float32Arrays, for the separate left and right channels) to the callback. It can be played back by creating a new source buffer and setting these buffers as the separate channel data:
