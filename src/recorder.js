@@ -100,14 +100,8 @@ export class Recorder {
                     const recLength = newRecBuffersArr.length * bufferLen
                     buffers.push(mergeBuffers(newRecBuffersArr, recLength));
                 }
-                let interleaved;
-                if (numChannels === 2) {
-                    interleaved = interleave(buffers[0], buffers[1]);
-                } else {
-                    interleaved = buffers[0];
-                }
-                let dataview = encodeWAV(interleaved);
-                let audioBlob = new Blob([dataview], {type: type});
+
+                const audioBlob = buffersToBlob(buffers, type)
 
                 this.postMessage({command: 'exportSecondsToWAV', data: audioBlob});
             }
@@ -117,16 +111,24 @@ export class Recorder {
                 for (let channel = 0; channel < numChannels; channel++) {
                     buffers.push(mergeBuffers(recBuffers[channel], recLength));
                 }
+
+                const audioBlob = buffersToBlob(buffers, type)
+
+                this.postMessage({command: 'exportWAV', data: audioBlob});
+            }
+
+            function buffersToBlob(buffers, type) {
                 let interleaved;
                 if (numChannels === 2) {
                     interleaved = interleave(buffers[0], buffers[1]);
                 } else {
                     interleaved = buffers[0];
                 }
-                let dataview = encodeWAV(interleaved);
-                let audioBlob = new Blob([dataview], {type: type});
 
-                this.postMessage({command: 'exportWAV', data: audioBlob});
+                const dataview = encodeWAV(interleaved);
+                const audioBlob = new Blob([dataview], {type: type});
+
+                return audioBlob
             }
 
             function getBuffer() {
